@@ -1,0 +1,17 @@
+node_modules/
+.env*
+!.env.example
+.next/
+.turbo/
+dist/
+build/
+.vercel/
+.fly/
+*.log
+.DS_Store
+.bun/
+bun.lockb
+.cache/
+coverage/
+
+*.tsbuildinfo
