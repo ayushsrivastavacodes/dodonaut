@@ -14,6 +14,8 @@ export const TOKEN_DECIMALS = 6;
 
 export type AssetSymbol = "USDG" | "USDC";
 
+export type AssetSymbolOrNull = AssetSymbol | null;
+
 export const MINT_BY_SYMBOL_MAINNET: Record<AssetSymbol, string> = {
   USDG: USDG_MINT_MAINNET,
   USDC: USDC_MINT_MAINNET,

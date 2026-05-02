@@ -5,12 +5,19 @@
  * The cluster-genesis prefix uniquely identifies the Solana cluster.
  */
 
-export const SOLANA_MAINNET_CAIP2 = "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp";
-export const SOLANA_DEVNET_CAIP2 = "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1";
+/**
+ * CAIP-2 strings as template-literal types so they're assignable to
+ * @x402/core/types `Network` (which is `\`${string}:${string}\``).
+ */
+export const SOLANA_MAINNET_CAIP2 =
+  "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp" as const;
+export const SOLANA_DEVNET_CAIP2 =
+  "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1" as const;
 
+export type Caip2Network = `${string}:${string}`;
 export type SolanaNetwork = "mainnet" | "devnet";
 
-export function caip2For(network: SolanaNetwork): string {
+export function caip2For(network: SolanaNetwork): Caip2Network {
   return network === "mainnet" ? SOLANA_MAINNET_CAIP2 : SOLANA_DEVNET_CAIP2;
 }
 
