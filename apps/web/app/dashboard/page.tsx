@@ -2,10 +2,12 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { getDb } from "@dodonaut/db/client";
-import { merchants, products } from "@dodonaut/db/schema";
+import { merchants, products, endpoints } from "@dodonaut/db/schema";
 import { eq } from "drizzle-orm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { WrapProductModal } from "@/components/wrap-product-modal";
+import { baseUnitsToUsdString } from "@dodonaut/shared/mints";
 
 export default async function DashboardPage() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -26,6 +28,11 @@ export default async function DashboardPage() {
     .select()
     .from(products)
     .where(eq(products.merchantId, merchant.id));
+
+  const endpointRows = await db
+    .select()
+    .from(endpoints)
+    .where(eq(endpoints.merchantId, merchant.id));
 
   return (
     <main className="mx-auto max-w-5xl px-6 py-12">
@@ -64,9 +71,11 @@ export default async function DashboardPage() {
             <CardTitle className="text-base font-medium">x402 endpoints</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-medium">0</div>
+            <div className="text-3xl font-medium">{endpointRows.length}</div>
             <p className="text-sm text-muted-foreground">
-              Pick a product to wrap.
+              {endpointRows.length === 0
+                ? "Pick a product to wrap."
+                : "Live and listening for agent calls."}
             </p>
           </CardContent>
         </Card>
@@ -92,22 +101,45 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             <ul className="space-y-2">
-              {productRows.map((p) => (
-                <li
-                  key={p.id}
-                  className="flex items-center justify-between rounded-md border px-4 py-3"
-                >
-                  <div>
-                    <div className="font-medium">{p.name}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {p.dodoProductId} · {p.type}
+              {productRows.map((p) => {
+                const wrapped = endpointRows.find((e) => e.productId === p.id);
+                return (
+                  <li
+                    key={p.id}
+                    className="flex items-center justify-between rounded-md border px-4 py-3"
+                  >
+                    <div>
+                      <div className="font-medium">{p.name}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {p.dodoProductId} · {p.type}
+                        {wrapped && (
+                          <>
+                            {" · "}
+                            <span className="text-green-600 dark:text-green-400">
+                              wrapped @ ${baseUnitsToUsdString(wrapped.priceUsdBaseUnits)}/call
+                            </span>
+                          </>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  <Button size="sm" variant="outline" disabled>
-                    Make x402 endpoint (Day 3)
-                  </Button>
-                </li>
-              ))}
+                    {wrapped ? (
+                      <Button size="sm" variant="ghost" disabled>
+                        Live
+                      </Button>
+                    ) : (
+                      <WrapProductModal
+                        productId={p.id}
+                        productName={p.name}
+                        defaultPriceUsd={
+                          p.priceUsdBaseUnits > 0n
+                            ? baseUnitsToUsdString(p.priceUsdBaseUnits)
+                            : "0.05"
+                        }
+                      />
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           </CardContent>
         </Card>
