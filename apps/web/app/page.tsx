@@ -2,7 +2,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { Hero } from "@/components/marketing/hero";
-import { StatsStrip } from "@/components/marketing/stats-strip";
+import { ByTheNumbers } from "@/components/marketing/by-the-numbers";
 import { HowItWorks } from "@/components/marketing/how-it-works";
 import { BuiltOn } from "@/components/marketing/built-on";
 import { ClosingCta } from "@/components/marketing/closing-cta";
@@ -23,7 +23,7 @@ export default async function HomePage() {
       <SiteNav />
       <main>
         <Hero />
-        <StatsStrip />
+        <ByTheNumbers />
         <div id="how-it-works">
           <HowItWorks />
         </div>

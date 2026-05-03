@@ -1,6 +1,7 @@
 import { ArrowRight, Github } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { TextGenerateEffect } from "@/components/ui/text-generate-effect";
 
 export function Hero() {
   return (
@@ -11,8 +12,11 @@ export function Hero() {
           <div className="space-y-8">
             <p className="eyebrow">Dodonaut · v0.1 · Mainnet ready</p>
             <h1 className="text-5xl leading-[1.05] tracking-tighter sm:text-6xl lg:text-[68px]">
-              The agent rail for{" "}
-              <span className="text-primary">Dodo Payments</span>.
+              <TextGenerateEffect
+                words="The agent rail for Dodo Payments."
+                className="font-display"
+                duration={0.6}
+              />
             </h1>
             <p className="max-w-xl text-lg leading-relaxed text-muted-foreground">
               Paste a Dodo product ID. Get an x402-protected URL. AI agents pay
