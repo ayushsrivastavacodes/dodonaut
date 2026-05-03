@@ -1,11 +1,31 @@
 import type { Metadata } from "next";
+import { Inter, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-jakarta",
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
+const jetbrains = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-jetbrains",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "Dodonaut — Per-call AI agent payments for Dodo merchants",
+  title: "Dodonaut — The agent rail for Dodo Payments",
   description:
-    "One-button wrapper that turns any Dodo Payments product into an x402-protected URL. AI agents pay per call in USDG on Solana. Settles into your existing Dodo dashboard.",
+    "Paste a Dodo product ID. Get an x402-protected URL. AI agents pay per call in USDG on Solana. Settlements land in your existing Dodo dashboard — your billing, payouts, MoR, and GST stay 100% with Dodo.",
 };
 
 export default function RootLayout({
@@ -14,8 +34,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="antialiased">
+    <html
+      lang="en"
+      className={`${inter.variable} ${jakarta.variable} ${jetbrains.variable}`}
+    >
+      <body>
         <Providers>{children}</Providers>
       </body>
     </html>

@@ -3,92 +3,162 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ============================================================
+ * Dodonaut design tokens — editorial fintech, light only.
+ * Source of truth: .stitch/DESIGN.md
+ * Strictly NO purple / cyan / indigo / gradients (anti-AI).
+ * ============================================================ */
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
+
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
+
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
+
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
+
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
+
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+
   --color-border: var(--border);
+  --color-subtle-border: var(--subtle-border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+
   --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
   --font-mono: var(--font-mono);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --radius: 0.625rem;
+  /* Surfaces */
+  --background: #fafaf7;          /* warm paper-white, NEVER #ffffff */
+  --surface: #ffffff;              /* pure white for elevated cards on top of background */
+  --foreground: #0a0a0a;           /* deep ink */
+
+  /* Cards / popovers default to surface white */
+  --card: #ffffff;
+  --card-foreground: #0a0a0a;
+  --popover: #ffffff;
+  --popover-foreground: #0a0a0a;
+
+  /* Single accent — deep amber. Used SPARINGLY (primary CTA + headline metric). */
+  --primary: #b45309;              /* amber-700 */
+  --primary-foreground: #ffffff;
+  --primary-hover: #92400e;        /* amber-800 */
+
+  /* Quiet secondary surface */
+  --secondary: #f5f5f4;            /* stone-100 */
+  --secondary-foreground: #0a0a0a;
+
+  /* Muted text + bg */
+  --muted: #f5f5f4;
+  --muted-foreground: #57534e;     /* stone-600 */
+
+  /* Hover/pressed accent surface (used for ghost button hover, etc.) */
+  --accent: #f5f5f4;
+  --accent-foreground: #0a0a0a;
+
+  /* Borders — warm-tinted gray, used aggressively */
+  --border: #e7e5e4;               /* stone-200 */
+  --subtle-border: #f5f5f4;        /* stone-100 — hairline dividers */
+  --input: #e7e5e4;
+  --ring: #b45309;                 /* focus ring matches primary */
+
+  /* Semantic */
+  --destructive: #b91c1c;          /* clay red */
+  --destructive-foreground: #ffffff;
+  --success: #15803d;              /* forest green — positive deltas only */
+  --success-foreground: #ffffff;
+
+  /* Fonts (loaded via next/font in app/layout.tsx as CSS vars) */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: var(--font-jakarta), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, "SF Mono", Menlo, Monaco, "Courier New", monospace;
+
+  --radius: 0.5rem;
 }
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-}
-
-/*
- * Per tailwind-v4-shadcn skill recommendation:
- * Avoid wrapping body styles in @layer base (CSS layer ordering can cause utilities
- * to override base styles). Define at root level instead.
- */
+/* ============================================================
+ * Base styles — defined at root level (no @layer base)
+ * per tailwind-v4-shadcn skill recommendation #8.
+ * ============================================================ */
 * {
   border-color: var(--border);
 }
 
+html,
 body {
   background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+  font-feature-settings: "ss01", "cv11";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Display headlines — Plus Jakarta Sans, tight tracking */
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+h1 {
+  letter-spacing: -0.025em;
+}
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* Mono utility — for wallet addresses, signatures, monetary values */
+.font-mono {
+  font-family: var(--font-mono);
+  font-feature-settings: "zero", "ss01";
+}
+
+/* Section eyebrow label — caption uppercase tracking-widest, mono */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+/* Subtle hairline divider */
+.hairline {
+  border-color: var(--subtle-border);
+}
+
+/* Selection in amber */
+::selection {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
 }
