@@ -12,7 +12,7 @@
 import { getDb } from "@dodonaut/db/client";
 import { onChainReceipts, agentWallets } from "@dodonaut/db/schema";
 import { sql } from "drizzle-orm";
-import type { ResolvedEndpoint } from "./endpoint-resolver.js";
+import type { ResolvedEndpoint } from "./endpoint-resolver";
 
 export interface LogSettlementInput {
   signature: string;

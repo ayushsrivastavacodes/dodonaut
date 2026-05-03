@@ -29,9 +29,9 @@ import {
   type AssetSymbol,
 } from "@dodonaut/shared/mints";
 import { caip2For, type Caip2Network } from "@dodonaut/shared/networks";
-import { resolveEndpoint, parsePath } from "./lib/endpoint-resolver.js";
-import { proxyToUpstream } from "./lib/proxy.js";
-import { logSettlement } from "./lib/settlement-logger.js";
+import { resolveEndpoint, parsePath } from "./lib/endpoint-resolver";
+import { proxyToUpstream } from "./lib/proxy";
+import { logSettlement } from "./lib/settlement-logger";
 
 const NETWORK = (process.env.SOLANA_NETWORK ?? "devnet") as "mainnet" | "devnet";
 const NETWORK_CAIP2: Caip2Network = caip2For(NETWORK);

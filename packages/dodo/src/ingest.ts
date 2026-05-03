@@ -1,5 +1,5 @@
 import type { AssetSymbol } from "@dodonaut/shared/mints";
-import { getDodoClient } from "./client.js";
+import { getDodoClient } from "./client";
 
 /**
  * Ingest a settled x402 call as a Dodo Usage Event.
