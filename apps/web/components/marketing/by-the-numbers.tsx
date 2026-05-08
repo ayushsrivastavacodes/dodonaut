@@ -34,7 +34,8 @@ export async function ByTheNumbers() {
           </div>
           <p className="hidden max-w-xs text-sm text-muted-foreground md:block">
             Measured against Solana mainnet + the Coinbase CDP x402
-            facilitator. Live activity reflects real on-chain settlements.
+            facilitator, settling in USDC. Live activity reflects real
+            on-chain settlements.
           </p>
         </div>
 
@@ -150,7 +151,8 @@ async function fetchRecentSettlements(): Promise<SettlementRowData[]> {
       id: r.id,
       merchant: anonymizeSlug(r.slug),
       amount: baseUnitsToUsdString(r.amountBaseUnits),
-      asset: r.asset,
+      // pgEnum settlement_asset still allows 'USDG' historically; coerce.
+      asset: "USDC" as const,
       ms: r.latencyMs ?? 0,
       agent: anonymizeWallet(r.agentWallet),
     }));

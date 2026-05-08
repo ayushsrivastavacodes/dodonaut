@@ -84,6 +84,8 @@ export const verifications = pgTable("verifications", {
 // ----- Dodonaut domain tables ---------------------------------------------------------------
 
 export const dodoEnvironment = pgEnum("dodo_environment", ["test_mode", "live_mode"]);
+// settlement_asset enum keeps USDG as a value (Postgres can't drop enum values
+// without recreating the type) — but Dodonaut only writes USDC.
 export const settlementAsset = pgEnum("settlement_asset", ["USDG", "USDC"]);
 export const endpointMode = pgEnum("endpoint_mode", ["x402", "human", "both"]);
 export const productType = pgEnum("product_type", ["one_time", "subscription", "usage"]);
@@ -166,11 +168,11 @@ export const endpoints = pgTable(
     upstreamUrl: text("upstream_url").notNull(),
     /** Per-call price in USD base units. Defaults to product price; merchant can override. */
     priceUsdBaseUnits: bigint("price_usd_base_units", { mode: "bigint" }).notNull(),
-    /** Subset of {USDC, USDG} the merchant accepts for this endpoint. USDC first by default. */
+    /** Assets the merchant accepts for this endpoint. USDC-only in v1. */
     acceptedAssets: text("accepted_assets")
       .array()
       .notNull()
-      .default(["USDC", "USDG"]),
+      .default(["USDC"]),
     description: text("description"),
     mode: endpointMode("mode").notNull().default("x402"),
     enabled: boolean("enabled").notNull().default(true),

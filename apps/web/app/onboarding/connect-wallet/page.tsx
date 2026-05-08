@@ -81,7 +81,7 @@ export default function ConnectWalletPage() {
       totalSteps={2}
       eyebrow="Connect wallet · Non-custodial"
       asideTitle="Your wallet, your money. Dodonaut never touches it."
-      asideBody="We watch your address for incoming USDC (and USDG) settlements. The agent's payment goes directly to you on-chain — Dodonaut is the paywall, not the custodian."
+      asideBody="We watch your address for incoming USDC settlements. The agent's payment goes directly to you on-chain — Dodonaut is the paywall, not the custodian."
       asideMetric={{
         value: "<400ms",
         label: "Solana finality. Settlements clear before the HTTP timeout.",

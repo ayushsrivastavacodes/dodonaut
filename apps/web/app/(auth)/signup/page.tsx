@@ -31,7 +31,7 @@ export default function SignupPage() {
       totalSteps={2}
       eyebrow="Sign in · 90 seconds to your first endpoint"
       asideTitle="Built for Indian SaaS founders shipping AI products globally."
-      asideBody="Sign in with Google. We auto-create your Dodo Payments customer and you're a wallet connect away from accepting agent payments in USDC on Solana — with USDG also accepted where Dodo's stack doesn't reach yet."
+      asideBody="Sign in with Google. We auto-create your Dodo Payments customer and you're a wallet connect away from accepting agent payments in USDC on Solana."
       asideMetric={{
         value: "<900ms",
         label: "Median agent settlement: Solana finality + x402 facilitator + upstream proxy",

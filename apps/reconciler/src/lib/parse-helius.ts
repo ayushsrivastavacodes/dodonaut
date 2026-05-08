@@ -2,11 +2,10 @@
  * Parse an array of Helius EnhancedTransaction events into settlement candidates.
  *
  * Pulls every SPL token transfer where the destination is a known merchant
- * Solana address AND the mint is one of our supported assets (USDG/USDC).
- * Native SOL transfers are ignored.
+ * Solana address AND the mint is USDC (mainnet or devnet). Native SOL
+ * transfers are ignored.
  */
 import {
-  USDG_MINT_MAINNET,
   USDC_MINT_MAINNET,
   USDC_MINT_DEVNET,
   symbolFromMint,
@@ -39,7 +38,6 @@ export interface HeliusEnhancedEvent {
 }
 
 const KNOWN_STABLECOIN_MINTS: ReadonlySet<string> = new Set([
-  USDG_MINT_MAINNET,
   USDC_MINT_MAINNET,
   USDC_MINT_DEVNET,
 ]);

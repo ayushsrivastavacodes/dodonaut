@@ -18,7 +18,7 @@ export interface LogSettlementInput {
   signature: string;
   agentWallet: string;
   amountBaseUnits: bigint;
-  asset: "USDG" | "USDC";
+  asset: "USDC";
   network: string;
   endToEndLatencyMs: number;
   endpoint: ResolvedEndpoint;

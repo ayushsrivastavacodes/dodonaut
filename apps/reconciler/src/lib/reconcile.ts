@@ -162,6 +162,7 @@ async function enrichExistingReceipt(
       status: "skipped_no_endpoint_match",
     };
   }
+  // Legacy enum still has 'USDG' as a value but we never write it. Coerce.
   return ingestAndStamp({
     receiptId: receipt.id,
     endpointId: ep.id,
@@ -172,7 +173,7 @@ async function enrichExistingReceipt(
       agentWallet: receipt.agentWallet,
       merchantWallet: merchant.solanaAddress,
       amountBaseUnits: receipt.amountBaseUnits,
-      asset: receipt.asset,
+      asset: "USDC",
       mint: "",
       raw: receipt.rawHeliusEvent,
     },

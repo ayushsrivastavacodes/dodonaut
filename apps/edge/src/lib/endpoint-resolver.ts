@@ -4,10 +4,6 @@
  *
  * Used by the x402 paymentMiddleware's DynamicPayTo/DynamicPrice callbacks
  * AND by the post-payment proxy handler.
- *
- * Result is cached on `globalThis` keyed by path for the lifetime of one request
- * so the two `accepts` entries (USDG + USDC) and the proxy step share a single
- * DB lookup.
  */
 import { getDb } from "@dodonaut/db/client";
 import { endpoints, merchants, products } from "@dodonaut/db/schema";

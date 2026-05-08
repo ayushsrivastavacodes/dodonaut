@@ -8,7 +8,7 @@ export interface SettlementRowData {
   id: string;
   merchant: string;
   amount: string; // already formatted, e.g. "0.05"
-  asset: "USDG" | "USDC";
+  asset: "USDC";
   ms: number;
   agent: string; // truncated agent wallet
 }

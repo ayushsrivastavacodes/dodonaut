@@ -1,0 +1,1 @@
+ALTER TABLE "endpoints" ALTER COLUMN "accepted_assets" SET DEFAULT '{"USDC"}';

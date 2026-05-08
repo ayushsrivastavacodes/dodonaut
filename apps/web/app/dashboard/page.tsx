@@ -81,7 +81,7 @@ export default async function DashboardPage() {
             label="Volume (7d)"
             value="$0.00"
             mono
-            sub="USDC + USDG across all endpoints"
+            sub="USDC across all endpoints"
           />
         </section>
 

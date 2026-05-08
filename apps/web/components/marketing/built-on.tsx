@@ -9,7 +9,7 @@ import { Marquee } from "@/components/ui/marquee";
 const PARTNERS = [
   "Dodo Payments",
   "Solana",
-  "USDG · Paxos",
+  "USDC · Circle",
   "x402 Foundation",
   "Coinbase CDP",
   "Helius",

@@ -2,8 +2,7 @@
  * Zod-validated environment loader.
  *
  * Each app builds its own validated env object from the relevant subset.
- * This prevents typos (DODP_PAYMENTS_API_KEY vs DODO_PAYMENTS_API_KEY)
- * and provides a typed `env.X` everywhere.
+ * Prevents typos and provides a typed `env.X` everywhere.
  */
 import { z } from "zod";
 
@@ -24,7 +23,6 @@ export const webEnvSchema = z.object({
   NEXT_PUBLIC_DODONAUT_API_BASE: z.string().url(),
   SOLANA_NETWORK: SolanaNetwork.default("devnet"),
   SOLANA_RPC_URL: z.string().url(),
-  USDG_MINT_MAINNET: z.string().min(32),
   USDC_MINT_MAINNET: z.string().min(32),
   USDC_MINT_DEVNET: z.string().min(32),
 });
@@ -36,7 +34,6 @@ export const edgeEnvSchema = z.object({
   COINBASE_CDP_API_SECRET: z.string().optional(),
   SOLANA_NETWORK: SolanaNetwork.default("devnet"),
   SOLANA_RPC_URL: z.string().url(),
-  USDG_MINT_MAINNET: z.string().min(32),
   USDC_MINT_MAINNET: z.string().min(32),
   USDC_MINT_DEVNET: z.string().min(32),
   DODONAUT_API_BASE: z.string().url(),
@@ -51,7 +48,6 @@ export const reconcilerEnvSchema = z.object({
   DODO_PAYMENTS_ENVIRONMENT: DodoEnvironment.default("test_mode"),
   SOLANA_NETWORK: SolanaNetwork.default("devnet"),
   SOLANA_RPC_URL: z.string().url(),
-  USDG_MINT_MAINNET: z.string().min(32),
   USDC_MINT_MAINNET: z.string().min(32),
 });
 
