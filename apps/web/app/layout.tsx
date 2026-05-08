@@ -25,7 +25,7 @@ const jetbrains = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Dodonaut — The agent rail for Dodo Payments",
   description:
-    "Paste a Dodo product ID. Get an x402-protected URL. AI agents pay per call in USDG on Solana. Settlements land in your existing Dodo dashboard — your billing, payouts, MoR, and GST stay 100% with Dodo.",
+    "Paste a Dodo product ID. Get an x402-protected URL. AI agents pay per call in USDC on Solana. Settlements land in your existing Dodo dashboard — your billing, payouts, MoR, and GST stay 100% with Dodo.",
 };
 
 export default function RootLayout({

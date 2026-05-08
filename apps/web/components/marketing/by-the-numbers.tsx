@@ -1,41 +1,30 @@
-"use client";
-
 /**
- * "By the numbers" section.
+ * "By the numbers" section — server component.
  *
- * Composed entirely from real component-library primitives:
- *   - Magic UI NumberTicker  → count-up animation on viewport entry
- *   - Magic UI AnimatedList  → spring-based feed of mock settlements
+ * Fetches REAL settlement data from on_chain_receipts (no mocking).
+ * If the table is empty, the live activity card renders an empty state
+ * rather than fabricating rows.
  *
  * Layout: 4-cell asymmetric bento grid (3 stat cells + 1 live activity feed
- * spanning two rows on the right). Says "this is a live financial product."
+ * spanning two rows on the right).
+ *
+ * Public-page privacy: merchant slugs and agent wallets are truncated for
+ * public display so individual users aren't deanonymized.
  */
 import { NumberTicker } from "@/components/ui/number-ticker";
-import { AnimatedList } from "@/components/ui/animated-list";
-import {
-  LiveSettlementRow,
-  type SettlementRowData,
-} from "./live-settlement-row";
-import { useMemo } from "react";
+import { LiveActivityFeed } from "./live-activity-feed";
+import type { SettlementRowData } from "./live-settlement-row";
+import { getDb } from "@dodonaut/db/client";
+import { merchants, onChainReceipts } from "@dodonaut/db/schema";
+import { eq, desc } from "drizzle-orm";
+import { baseUnitsToUsdString } from "@dodonaut/shared/mints";
 
-const MOCK_SETTLEMENTS: SettlementRowData[] = [
-  { id: "1", merchant: "scira-rewrite",   amount: "0.050", asset: "USDG", ms: 712, agent: "AGTabc…1q9" },
-  { id: "2", merchant: "resumedogs-tailor", amount: "0.012", asset: "USDC", ms: 684, agent: "AGTjkl…m44" },
-  { id: "3", merchant: "bundled-export",  amount: "0.075", asset: "USDG", ms: 821, agent: "AGTpqr…7zz" },
-  { id: "4", merchant: "khichdi-lex",     amount: "0.020", asset: "USDC", ms: 593, agent: "AGTuvw…xy2" },
-  { id: "5", merchant: "mcpify-deploy",   amount: "0.150", asset: "USDG", ms: 760, agent: "AGTvbn…m1k" },
-  { id: "6", merchant: "scira-rewrite",   amount: "0.050", asset: "USDG", ms: 642, agent: "AGTqaz…wsx" },
-  { id: "7", merchant: "bundled-export",  amount: "0.075", asset: "USDG", ms: 715, agent: "AGTedc…rfv" },
-  { id: "8", merchant: "khichdi-lex",     amount: "0.020", asset: "USDC", ms: 698, agent: "AGTtgb…yhn" },
-];
-
-export function ByTheNumbers() {
-  const settlements = useMemo(() => MOCK_SETTLEMENTS, []);
+export async function ByTheNumbers() {
+  const settlements = await fetchRecentSettlements();
 
   return (
     <section className="border-b border-border bg-background">
       <div className="mx-auto max-w-[1200px] px-6 py-24 lg:py-28">
-        {/* Section header */}
         <div className="mb-12 flex items-end justify-between gap-8 border-b border-border pb-6">
           <div>
             <p className="eyebrow mb-2">By the numbers</p>
@@ -44,14 +33,12 @@ export function ByTheNumbers() {
             </h2>
           </div>
           <p className="hidden max-w-xs text-sm text-muted-foreground md:block">
-            Measured against Solana mainnet + the Coinbase CDP x402 facilitator,
-            May 2026.
+            Measured against Solana mainnet + the Coinbase CDP x402
+            facilitator. Live activity reflects real on-chain settlements.
           </p>
         </div>
 
-        {/* Bento grid */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:auto-rows-[180px]">
-          {/* CARD 1 — wide: time to first endpoint */}
           <StatCard
             className="md:col-span-2 md:row-span-1"
             eyebrow="Time to first endpoint"
@@ -61,49 +48,50 @@ export function ByTheNumbers() {
                   value={90}
                   className="font-mono text-[var(--primary)]"
                 />
-                <span className="ml-1 font-mono text-3xl text-muted-foreground/60">
+                <span className="ml-1 font-mono text-3xl text-muted-foreground/70">
                   s
                 </span>
               </span>
             }
-            body="Cold-start a Google account, connect Phantom, paste a Dodo product ID, copy the x402 URL. Median across our 5 design partners."
+            body="Cold-start a Google account, connect Phantom, paste a Dodo product ID, copy the x402 URL."
           />
 
-          {/* CARD 2 — tall right-side: live settlements feed (spans both rows) */}
+          {/* Tall right card: real live activity feed (or empty state) */}
           <div className="row-span-2 flex flex-col overflow-hidden rounded-xl border border-border bg-surface">
             <div className="flex items-center justify-between border-b border-subtle-border px-5 py-3">
               <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-                Live activity · devnet
+                Live activity
               </p>
-              <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-success">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-success" />
-                Streaming
+              <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest">
+                <span
+                  className={`h-1.5 w-1.5 rounded-full ${settlements.length > 0 ? "animate-pulse bg-success" : "bg-stone-300"}`}
+                />
+                <span
+                  className={
+                    settlements.length > 0
+                      ? "text-success"
+                      : "text-muted-foreground"
+                  }
+                >
+                  {settlements.length > 0 ? "Streaming" : "Idle"}
+                </span>
               </span>
             </div>
-            <div className="relative flex-1 overflow-hidden p-3">
-              <AnimatedList delay={1500} className="space-y-2">
-                {settlements.map((s) => (
-                  <LiveSettlementRow key={s.id} data={s} />
-                ))}
-              </AnimatedList>
-              {/* fade-out gradient on the bottom for the scroll edge */}
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-surface to-transparent" />
-            </div>
+            <LiveActivityFeed settlements={settlements} />
           </div>
 
-          {/* CARD 3 — settlement latency */}
           <StatCard
             eyebrow="Settlement latency"
             metric={
               <span className="flex items-baseline">
-                <span className="font-mono text-3xl text-muted-foreground/60">
+                <span className="font-mono text-3xl text-muted-foreground/70">
                   &lt;
                 </span>
                 <NumberTicker
                   value={900}
                   className="font-mono text-[var(--primary)]"
                 />
-                <span className="ml-1 font-mono text-3xl text-muted-foreground/60">
+                <span className="ml-1 font-mono text-3xl text-muted-foreground/70">
                   ms
                 </span>
               </span>
@@ -112,12 +100,11 @@ export function ByTheNumbers() {
             compact
           />
 
-          {/* CARD 4 — per-call cost */}
           <StatCard
             eyebrow="Per-call infra cost"
             metric={
               <span className="flex items-baseline">
-                <span className="font-mono text-3xl text-muted-foreground/60">
+                <span className="font-mono text-3xl text-muted-foreground/70">
                   $
                 </span>
                 <NumberTicker
@@ -134,6 +121,54 @@ export function ByTheNumbers() {
       </div>
     </section>
   );
+}
+
+/**
+ * Pull the 12 most-recent confirmed settlements across all merchants.
+ * Returns lightly-anonymized data suitable for a public marketing page —
+ * no full wallet addresses, no full merchant slugs.
+ */
+async function fetchRecentSettlements(): Promise<SettlementRowData[]> {
+  try {
+    const db = getDb();
+    const rows = await db
+      .select({
+        id: onChainReceipts.id,
+        slug: merchants.slug,
+        amountBaseUnits: onChainReceipts.amountBaseUnits,
+        asset: onChainReceipts.asset,
+        agentWallet: onChainReceipts.agentWallet,
+        latencyMs: onChainReceipts.endToEndLatencyMs,
+        createdAt: onChainReceipts.createdAt,
+      })
+      .from(onChainReceipts)
+      .innerJoin(merchants, eq(merchants.id, onChainReceipts.merchantId))
+      .orderBy(desc(onChainReceipts.createdAt))
+      .limit(12);
+
+    return rows.map((r) => ({
+      id: r.id,
+      merchant: anonymizeSlug(r.slug),
+      amount: baseUnitsToUsdString(r.amountBaseUnits),
+      asset: r.asset,
+      ms: r.latencyMs ?? 0,
+      agent: anonymizeWallet(r.agentWallet),
+    }));
+  } catch (err) {
+    console.warn("fetchRecentSettlements failed (returning empty):", err);
+    return [];
+  }
+}
+
+function anonymizeSlug(slug: string): string {
+  if (!slug) return "•••";
+  // First 3 chars + 3 dots, e.g. "sci•••". Public landing — protect users.
+  return `${slug.slice(0, 3)}•••`;
+}
+
+function anonymizeWallet(addr: string): string {
+  if (!addr || addr.length < 8) return "AGT•••";
+  return `${addr.slice(0, 4)}…${addr.slice(-3)}`;
 }
 
 function StatCard({

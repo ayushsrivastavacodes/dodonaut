@@ -38,14 +38,17 @@ const NETWORK_CAIP2: Caip2Network = caip2For(NETWORK);
 const FACILITATOR_URL =
   process.env.X402_FACILITATOR_URL ?? "https://x402.org/facilitator";
 
-// Featured asset list per network.
-// Mainnet: USDG primary (sponsor + market signal), USDC fallback.
-// Devnet:  USDC only (USDG isn't on devnet).
+// Featured asset list per network. USDC is primary on both networks because
+// it's where the liquidity actually lives ($11B+ on Solana, default money
+// parser in @x402/svm, and what every agent's wallet is realistically funded
+// with). USDG is also accepted on mainnet as a differentiator — Dodo's
+// May-9 stablecoin launch only covers USDG-on-Ethereum, so USDG-on-Solana
+// is genuinely the gap we fill there.
 const ASSETS_FOR_NETWORK: Array<{ symbol: AssetSymbol; mint: string }> =
   NETWORK === "mainnet"
     ? [
-        { symbol: "USDG", mint: USDG_MINT_MAINNET },
         { symbol: "USDC", mint: USDC_MINT_MAINNET },
+        { symbol: "USDG", mint: USDG_MINT_MAINNET },
       ]
     : [{ symbol: "USDC", mint: USDC_MINT_DEVNET }];
 

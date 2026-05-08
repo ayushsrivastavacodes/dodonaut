@@ -157,9 +157,9 @@ export function WrapProductModal({
             <DialogHeader>
               <DialogTitle>Wrap “{productName}” as x402</DialogTitle>
               <DialogDescription>
-                Agents call your URL → pay USDG/USDC on Solana → Dodonaut
-                proxies to your upstream → each settled call lands in your
-                Dodo meter.
+                Agents call your URL → pay USDC (or USDG) on Solana →
+                Dodonaut proxies to your upstream → each settled call lands
+                in your Dodo meter.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-2">
@@ -187,8 +187,8 @@ export function WrapProductModal({
                   disabled={pending}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Settles in USDG by default, with USDC as fallback in the 402
-                  response.
+                  Settles in USDC by default. USDG also accepted on Solana
+                  mainnet (returned as a second entry in the 402 response).
                 </p>
               </div>
             </div>

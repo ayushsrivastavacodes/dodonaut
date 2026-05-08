@@ -70,7 +70,7 @@ export async function wrapProduct(
       merchantId: merchant.id,
       upstreamUrl: input.upstreamUrl,
       priceUsdBaseUnits: priceBaseUnits,
-      acceptedAssets: ["USDG", "USDC"],
+      acceptedAssets: ["USDC", "USDG"],
       description: input.description ?? `${product.name} — single API call`,
       mode: "x402",
       enabled: true,
@@ -143,7 +143,7 @@ function generateSnippet(url: string, priceUsd: string): string {
     `const signer = await createSvmSigner({ /* your Solana keypair */ });`,
     `const fetchPaid = wrapFetchWithPayment(fetch, signer);`,
     ``,
-    `// Costs ≈ $${priceUsd} USDG per call. Settles in <900ms on Solana.`,
+    `// Costs ≈ $${priceUsd} USDC per call (USDG also accepted). Settles in <900ms on Solana.`,
     `const res = await fetchPaid("${url}");`,
     `console.log(await res.json());`,
   ].join("\n");

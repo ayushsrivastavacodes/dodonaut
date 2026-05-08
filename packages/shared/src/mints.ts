@@ -1,9 +1,11 @@
 /**
  * Solana SPL token mints used by Dodonaut.
  *
- * USDG is the featured settlement asset (PRD §10.1, §2.3 — Paxos Global Dollar,
- * $1B+ supply on Solana, prize denomination). USDC is the fallback for agent
- * wallets that don't hold USDG.
+ * USDC is the primary settlement asset on both networks — it's where the
+ * liquidity actually lives ($11B+ on Solana, default money parser in
+ * @x402/svm). USDG is also accepted on mainnet as a differentiator: Dodo's
+ * May-9 stablecoin launch only covers USDG-on-Ethereum, so USDG-on-Solana
+ * is a real gap in their stack.
  */
 
 export const USDG_MINT_MAINNET = "2u1tszSeqZ3qBWF3uNGPFc8TzMk2tdiwknnRMWGWjGWH";

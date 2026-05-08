@@ -115,7 +115,7 @@ export const merchants = pgTable(
     solanaAddress: text("solana_address").notNull(),
     defaultSettlementAsset: settlementAsset("default_settlement_asset")
       .notNull()
-      .default("USDG"),
+      .default("USDC"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
@@ -166,11 +166,11 @@ export const endpoints = pgTable(
     upstreamUrl: text("upstream_url").notNull(),
     /** Per-call price in USD base units. Defaults to product price; merchant can override. */
     priceUsdBaseUnits: bigint("price_usd_base_units", { mode: "bigint" }).notNull(),
-    /** Subset of {USDG, USDC} the merchant accepts for this endpoint. USDG first if present. */
+    /** Subset of {USDC, USDG} the merchant accepts for this endpoint. USDC first by default. */
     acceptedAssets: text("accepted_assets")
       .array()
       .notNull()
-      .default(["USDG", "USDC"]),
+      .default(["USDC", "USDG"]),
     description: text("description"),
     mode: endpointMode("mode").notNull().default("x402"),
     enabled: boolean("enabled").notNull().default(true),

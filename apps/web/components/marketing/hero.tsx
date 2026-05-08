@@ -20,7 +20,7 @@ export function Hero() {
             </h1>
             <p className="max-w-xl text-lg leading-relaxed text-muted-foreground">
               Paste a Dodo product ID. Get an x402-protected URL. AI agents pay
-              per call in <span className="font-mono text-foreground">USDG</span>{" "}
+              per call in <span className="font-mono text-foreground">USDC</span>{" "}
               on Solana. Settlements land in your existing Dodo dashboard — your
               billing, payouts, MoR, and GST stay 100% with Dodo.
             </p>
@@ -64,7 +64,7 @@ import { ExactSvmSchemeV1 } from "@x402/svm/client";
 
 const fetchPaid = wrapFetchWithPayment(fetch, signer);
 
-// $0.05 USDG per call. Settles in <900ms on Solana.
+// $0.05 USDC per call. Settles in <900ms on Solana.
 const res = await fetchPaid(
   "https://api.dodonaut.xyz/m/aman/p/pdt_resume"
 );

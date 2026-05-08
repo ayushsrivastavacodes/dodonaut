@@ -14,7 +14,8 @@ export function SiteFooter() {
             </div>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground">
               The agent rail for Dodo Payments. Per-call AI-agent payments on
-              Solana, USDG settlement, ships into your existing Dodo dashboard.
+              Solana, settled in USDC (USDG also accepted), ships into your
+              existing Dodo dashboard.
             </p>
             <p className="mt-6 font-mono text-xs text-muted-foreground">
               © 2026 Dodonaut
