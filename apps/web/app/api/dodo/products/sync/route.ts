@@ -33,37 +33,47 @@ export async function POST(req: Request) {
   const list = await dodo.products.list({ page_size: 100 });
   const items = list?.items ?? [];
 
+  // Verified against Dodo SDK ProductListResponse type + docs:
+  //   - `price` is at the top level, integer in the smallest currency
+  //     denomination (cents for USD; e.g. $0.05 = 5).
+  //   - `price_detail` (with the `one_time | recurring | usage_based`
+  //     discriminator) is NOT on the LIST response — only on retrieve(id).
+  //   - We approximate type from `is_recurring` only. Usage detection
+  //     would require a per-product retrieve() call (skipped in v1).
+  // Convert cents → USDC base units (6 decimals): cents * 10000.
   let upserted = 0;
-  for (const p of items) {
-    const productId = (p as { product_id?: string }).product_id;
-    if (!productId) continue;
-    const name = (p as { name?: string | null }).name ?? "(unnamed product)";
-    const priceObj = (p as { price?: { price?: number } }).price;
-    const priceUsdBaseUnits = BigInt(priceObj?.price ?? 0);
-    const isRecurring = Boolean(
-      (p as { is_recurring?: boolean }).is_recurring,
-    );
-    const isUsage = Boolean(
-      (p as { is_usage_based?: boolean }).is_usage_based,
-    );
-    const type: NewProduct["type"] = isUsage
-      ? "usage"
-      : isRecurring
-        ? "subscription"
-        : "one_time";
+  type DodoListItem = {
+    product_id: string;
+    name?: string | null;
+    price?: number | null;
+    is_recurring: boolean;
+    currency?: string | null;
+  };
+  for (const raw of items) {
+    const p = raw as DodoListItem;
+    if (!p.product_id) continue;
+    const name = p.name ?? "(unnamed product)";
+    const priceCents = BigInt(p.price ?? 0);
+    const priceUsdBaseUnits = priceCents * 10000n;
+    const type: NewProduct["type"] = p.is_recurring
+      ? "subscription"
+      : "one_time";
 
-    const slug = `${name.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 32)}-${productId.slice(-6)}`;
+    const slug = `${name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .slice(0, 32)}-${p.product_id.slice(-6)}`;
 
     await db
       .insert(products)
       .values({
         merchantId: merchant.id,
-        dodoProductId: productId,
+        dodoProductId: p.product_id,
         slug,
         name,
         type,
         priceUsdBaseUnits,
-        rawDodoProduct: p as unknown as Record<string, unknown>,
+        rawDodoProduct: raw as unknown as Record<string, unknown>,
       })
       .onConflictDoUpdate({
         target: [products.merchantId, products.dodoProductId],
@@ -71,7 +81,7 @@ export async function POST(req: Request) {
           name,
           type,
           priceUsdBaseUnits,
-          rawDodoProduct: p as unknown as Record<string, unknown>,
+          rawDodoProduct: raw as unknown as Record<string, unknown>,
           updatedAt: new Date(),
         },
       });
