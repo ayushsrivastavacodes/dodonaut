@@ -16,7 +16,7 @@
  * Pass criterion: <2s end-to-end on devnet, with proxied upstream body printed.
  */
 import { wrapFetchWithPayment } from "@x402/fetch";
-import { ExactSvmSchemeV1 } from "@x402/svm/client";
+import { ExactSvmScheme } from "@x402/svm/exact/client";
 import { x402Client } from "@x402/core/client";
 import { createKeyPairSignerFromBytes } from "@solana/kit";
 import * as fs from "node:fs";
@@ -51,9 +51,19 @@ const signer = await createKeyPairSignerFromBytes(secretBytes);
 console.log(`Agent wallet:   ${signer.address}`);
 console.log(`Calling:        ${endpointUrl}`);
 
+const NETWORK = (process.env.SOLANA_NETWORK ?? "mainnet") as
+  | "mainnet"
+  | "devnet";
+const NETWORK_CAIP2 =
+  NETWORK === "mainnet"
+    ? "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"
+    : "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1";
+
+console.log(`Network:        ${NETWORK} (${NETWORK_CAIP2})`);
+
 const client = new x402Client();
-const scheme = new ExactSvmSchemeV1({ signer });
-client.register("solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1", scheme);
+const scheme = new ExactSvmScheme(signer);
+client.register(NETWORK_CAIP2, scheme);
 
 const fetchPaid = wrapFetchWithPayment(fetch, client);
 
@@ -71,6 +81,18 @@ const res = await fetchPaid(endpointUrl);
 const elapsed = Date.now() - startedAt;
 console.log(`Final status:    ${res.status}`);
 console.log(`Elapsed:         ${elapsed}ms`);
+
+// Surface every header the response includes so we see what the facilitator says
+console.log("Response headers:");
+for (const [k, v] of res.headers.entries()) {
+  console.log(`  ${k}: ${v.length > 1200 ? v.slice(0, 1200) + "…" : v}`);
+  if (k === "payment-required") {
+    try {
+      let s = v; while (s.length % 4) s += "=";
+      console.log("    decoded:", Buffer.from(s, "base64").toString("utf-8"));
+    } catch (e) { console.log("    decode err", e); }
+  }
+}
 
 const xpr = res.headers.get("x-payment-response");
 if (xpr) {

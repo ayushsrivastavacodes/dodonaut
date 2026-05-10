@@ -21,6 +21,7 @@ import { cors } from "hono/cors";
 import { paymentMiddleware } from "@x402/hono";
 import { x402ResourceServer, HTTPFacilitatorClient } from "@x402/core/server";
 import { ExactSvmScheme } from "@x402/svm/exact/server";
+import { createFacilitatorConfig } from "@coinbase/x402";
 import { baseUnitsToUsdString } from "@dodonaut/shared/mints";
 import { caip2For, type Caip2Network } from "@dodonaut/shared/networks";
 import { resolveEndpoint } from "./lib/endpoint-resolver";
@@ -29,19 +30,21 @@ import { logSettlement } from "./lib/settlement-logger";
 
 const NETWORK = (process.env.SOLANA_NETWORK ?? "devnet") as "mainnet" | "devnet";
 const NETWORK_CAIP2: Caip2Network = caip2For(NETWORK);
-const FACILITATOR_URL =
-  process.env.X402_FACILITATOR_URL ?? "https://x402.org/facilitator";
 
-const facilitatorClient = new HTTPFacilitatorClient({
-  url: FACILITATOR_URL,
-  ...(process.env.COINBASE_CDP_API_KEY && {
-    createAuthHeaders: async () => {
-      const auth = `Bearer ${process.env.COINBASE_CDP_API_KEY!}`;
-      const headers = { Authorization: auth };
-      return { verify: headers, settle: headers, supported: headers };
-    },
-  }),
-});
+// Coinbase CDP is the only public x402 facilitator that supports Solana
+// mainnet (verified May 2026 — PayAI/x402.org are EVM-only). createFacilitatorConfig
+// from @coinbase/x402 handles Ed25519 JWT auth via @coinbase/cdp-sdk and
+// returns the URL + createAuthHeaders callback HTTPFacilitatorClient expects.
+const cdpKeyId = process.env.COINBASE_CDP_API_KEY;
+const cdpKeySecret = process.env.COINBASE_CDP_API_SECRET;
+if (!cdpKeyId || !cdpKeySecret) {
+  throw new Error(
+    "COINBASE_CDP_API_KEY + COINBASE_CDP_API_SECRET required (Solana mainnet only supported via CDP facilitator)",
+  );
+}
+const facilitatorConfig = createFacilitatorConfig(cdpKeyId, cdpKeySecret);
+const FACILITATOR_URL = facilitatorConfig.url;
+const facilitatorClient = new HTTPFacilitatorClient(facilitatorConfig);
 
 const resourceServer = new x402ResourceServer(facilitatorClient).register(
   NETWORK_CAIP2,
@@ -92,6 +95,49 @@ app.get("/healthz", (c) =>
   }),
 );
 
+// Post-settlement hook — runs *after* paymentMiddleware so c.res.headers has
+// the `payment-response` header that the middleware sets post-settlement.
+// Eagerly inserts on_chain_receipts row; the Day-5 reconciler enriches later.
+app.use("/m/:merchantSlug/p/:dodoProductId", async (c, next) => {
+  const startedAt = Date.now();
+  await next();
+
+  if (!c.res || c.res.status >= 400) return;
+
+  const xpr = c.res.headers.get("payment-response");
+  if (!xpr) return;
+
+  try {
+    const parsed = JSON.parse(Buffer.from(xpr, "base64").toString("utf-8")) as {
+      transaction?: string;
+      payer?: string;
+      amount?: string;
+    };
+    if (!parsed.transaction || !parsed.payer) return;
+
+    const ep = await resolveEndpoint(c.req.path);
+    if (!ep) return;
+
+    const amountBaseUnits = parsed.amount
+      ? BigInt(parsed.amount)
+      : ep.priceUsdBaseUnits;
+
+    void logSettlement({
+      signature: parsed.transaction,
+      agentWallet: parsed.payer,
+      amountBaseUnits,
+      asset: "USDC",
+      network: NETWORK_CAIP2,
+      endToEndLatencyMs: Date.now() - startedAt,
+      endpoint: ep,
+    }).catch((err) => {
+      console.error("logSettlement failed (Day-5 reconciler will retry)", err);
+    });
+  } catch (err) {
+    console.warn("could not parse payment-response header", err);
+  }
+});
+
 app.use(
   "/m/:merchantSlug/p/:dodoProductId",
   paymentMiddleware(
@@ -103,56 +149,14 @@ app.use(
     resourceServer,
     undefined,
     undefined,
-    false,
+    true, // syncFacilitatorOnStart — fetch supported kinds before first request
   ),
 );
 
 async function handleProxied(c: Context) {
-  const startedAt = Date.now();
   const ep = await resolveEndpoint(c.req.path);
   if (!ep) return c.notFound();
-
-  const upstreamRes = await proxyToUpstream(c, ep.upstreamUrl);
-
-  // Parse settlement details from x-payment-response header (set by middleware).
-  let signature: string | null = null;
-  let agentWallet: string | null = null;
-  let amountBaseUnits: bigint = ep.priceUsdBaseUnits;
-  try {
-    const xpr =
-      c.res?.headers.get("x-payment-response") ??
-      upstreamRes.headers.get("x-payment-response");
-    if (xpr) {
-      const parsed = JSON.parse(
-        Buffer.from(xpr, "base64").toString("utf-8"),
-      ) as {
-        transaction?: string;
-        payer?: string;
-        amount?: string;
-      };
-      signature = parsed.transaction ?? null;
-      agentWallet = parsed.payer ?? null;
-      if (parsed.amount) amountBaseUnits = BigInt(parsed.amount);
-    }
-  } catch (err) {
-    console.warn("could not parse x-payment-response header", err);
-  }
-
-  if (signature && agentWallet) {
-    void logSettlement({
-      signature,
-      agentWallet,
-      amountBaseUnits,
-      asset: "USDC",
-      network: NETWORK_CAIP2,
-      endToEndLatencyMs: Date.now() - startedAt,
-      endpoint: ep,
-    }).catch((err) => {
-      console.error("logSettlement failed (Day-5 reconciler will retry)", err);
-    });
-  }
-
-  return upstreamRes;
+  return proxyToUpstream(c, ep.upstreamUrl);
 }
 
 app.get("/m/:merchantSlug/p/:dodoProductId", handleProxied);
