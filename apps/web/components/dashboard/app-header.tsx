@@ -35,9 +35,6 @@ export function AppHeader({
             <Link className="hover:text-foreground" href="/dashboard/calls">
               Calls
             </Link>
-            <Link className="hover:text-foreground" href="/dashboard/settings">
-              Settings
-            </Link>
           </nav>
         </div>
       </div>
