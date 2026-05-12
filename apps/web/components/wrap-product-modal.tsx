@@ -56,7 +56,9 @@ export function WrapProductModal({
         endpointId: data.endpointId,
       });
       toast.success("x402 endpoint generated");
-      router.refresh();
+      // NOTE: do NOT router.refresh() here — refreshing the dashboard
+      // unmounts this modal because the product moves from "unwrapped" to
+      // "wrapped" in the server-rendered list. Refresh on Done instead.
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not wrap");
     } finally {
@@ -72,11 +74,13 @@ export function WrapProductModal({
   }
 
   function reset() {
+    const hadResult = result !== null;
     setOpen(false);
     setTimeout(() => {
       setResult(null);
       setUpstreamUrl("");
       setPriceUsd(defaultPriceUsd);
+      if (hadResult) router.refresh();
     }, 300);
   }
 
